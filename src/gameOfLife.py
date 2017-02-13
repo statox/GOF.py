@@ -15,7 +15,37 @@ import sys
 import imageio
 
 import tkinter as tk
-from PIL import ImageTk, Image
+from PIL import Image, ImageTk
+# from ttk import Frame, Button, Style
+import time
+
+class GOFImage():
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.title('GEN')
+
+        # pick an image file you have .bmp  .jpg  .gif.  .png
+        # load the file and covert it to a Tkinter image object
+        self.image1 = ImageTk.PhotoImage(Image.open(IMAGE_PATH))
+
+        # get the image size
+        w = self.image1.width()*10
+        h = self.image1.height()*10
+
+        # position coordinates of root 'upper left corner'
+        x = 0
+        y = 0
+
+        # make the root window the size of the image
+        self.root.geometry("%dx%d+%d+%d" % (w, h, x, y))
+
+        # root has no image argument, so use a label as a panel
+        self.panel1 = tk.Label(self.root, image=self.image1)
+        self.display = self.image1
+        self.panel1.pack(side=tk.TOP, fill=tk.BOTH, expand=tk.YES)
+        print("Display image1")
+        # self.root.after(30000, self.update_image)
+        self.root.mainloop()
 
 def initGrid(cols, rows, array):
     for i in range(rows):
@@ -57,15 +87,13 @@ def printGen(cols, rows, array, genNo, imageGen):
         elif v == ' ':
             im.putpixel((c,l),0)
         c += 1
-        if c == cols:
+        if c == cols-1:
             c=0
             l+=1
 
     im.save(IMAGE_PATH)
     for _ in range(5):
         imageGen.append(imageio.imread(IMAGE_PATH))
-        # imageGen.append(imageio.imread(im))
-
 
     # print(strArray)
     return strArray
@@ -111,15 +139,11 @@ def main():
     gens = 0
     imagesGen = []
 
-# window = tk.Tk()
-# window.title("Join")
-# window.geometry("300x300")
-# window.configure(background='grey')
-# window.mainloop()
     while True:
         gens += 1
         thisGenStr = printGen(COLS, ROWS, thisGen, gens, imagesGen)
-        if (gens<50 and not isRepetition(thisGenStr)):
+        # if (not isRepetition(thisGenStr)):
+        if (gens<100 and not isRepetition(thisGenStr)):
             processNextGen(COLS, ROWS, thisGen, nextGen)
             time.sleep(DELAY)
             thisGen, nextGen = nextGen, thisGen
@@ -137,3 +161,4 @@ DELAY = 0.0
 PASTGENS = []
 IMAGE_PATH='./gen.png'
 main()
+# test= GOFImage()
