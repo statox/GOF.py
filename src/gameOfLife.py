@@ -55,11 +55,11 @@ class GOFImage():
         self.gens += 1
         self.thisGenStr = self.printGen(COLS, ROWS, self.thisGen, self.gens, self.imagesGen)
 
-        if (self.gens<100 and not self.isRepetition(self.thisGenStr)):
+        if (not self.isRepetition(self.thisGenStr)):
             self.processNextGen(COLS, ROWS, self.thisGen, self.nextGen)
             self.thisGen, self.nextGen = self.nextGen, self.thisGen
 
-            self.image1 = ImageTk.PhotoImage(Image.open(IMAGE_PATH))
+            self.image1 = ImageTk.PhotoImage(Image.open(IMAGE_PATH_FULL))
             self.panel1.configure(image=self.image1)
             self.display = self.image1
 
@@ -95,8 +95,17 @@ class GOFImage():
                     im.putpixel((j,i),0)
 
         im.save(IMAGE_PATH)
+        self.resizeImage()
 
         return strArray
+
+    def resizeImage(self):
+        basewidth = 1000
+        img = Image.open(IMAGE_PATH)
+        wpercent = (basewidth / float(img.size[0]))
+        hsize = int((float(img.size[1]) * float(wpercent)))
+        img = img.resize((basewidth, hsize), Image.ANTIALIAS)
+        img.save(IMAGE_PATH_FULL)
 
     def processNextGen(self, cols, rows, cur, nxt):
         for i in range(1,rows-1):
@@ -130,10 +139,11 @@ class GOFImage():
             return False
 
 
-ROWS = 200
-COLS = 200
+ROWS = 100
+COLS = 100
 DELAY = 1
 PASTGENS = []
 IMAGE_PATH='./gen.png'
+IMAGE_PATH_FULL='./genFull.png'
 
 test = GOFImage()
