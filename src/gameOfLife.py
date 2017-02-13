@@ -100,7 +100,7 @@ class GOFImage():
         return strArray
 
     def resizeImage(self):
-        basewidth = 1000
+        basewidth = 500
         img = Image.open(IMAGE_PATH)
         wpercent = (basewidth / float(img.size[0]))
         hsize = int((float(img.size[1]) * float(wpercent)))
