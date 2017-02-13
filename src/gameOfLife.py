@@ -16,8 +16,6 @@ import imageio
 
 import tkinter as tk
 from PIL import Image, ImageTk
-# from ttk import Frame, Button, Style
-import time
 
 class GOFImage():
     def __init__(self):
@@ -33,7 +31,7 @@ class GOFImage():
         self.gens = 0
         self.imagesGen = []
 
-        self.image1 = ImageTk.PhotoImage(Image.open('gen.png'))
+        self.image1 = ImageTk.PhotoImage(Image.open(IMAGE_PATH))
 
         w = self.image1.width()*10
         h = self.image1.height()*10
@@ -50,11 +48,10 @@ class GOFImage():
         self.display = self.image1
         self.panel1.pack(side=tk.TOP, fill=tk.BOTH, expand=tk.YES)
 
-        # self.root.after(3000, self.nextGen)
-        self.root.after(1, self.toto)
+        self.root.after(DELAY, self.nextGenLoop)
         self.root.mainloop()
 
-    def toto(self):
+    def nextGenLoop(self):
         self.gens += 1
         self.thisGenStr = self.printGen(COLS, ROWS, self.thisGen, self.gens, self.imagesGen)
 
@@ -62,33 +59,12 @@ class GOFImage():
             self.processNextGen(COLS, ROWS, self.thisGen, self.nextGen)
             self.thisGen, self.nextGen = self.nextGen, self.thisGen
 
-            self.image1 = ImageTk.PhotoImage(Image.open('gen.png'))
+            self.image1 = ImageTk.PhotoImage(Image.open(IMAGE_PATH))
             self.panel1.configure(image=self.image1)
             self.display = self.image1
 
-            self.root.after(1, self.toto)
+            self.root.after(DELAY, self.nextGenLoop)
         return
-
-    def nextGen(self):
-        self.gens += 1
-        thisGenStr = self.printGen(COLS, ROWS, self.thisGen, self.gens, imagesGen)
-        # if (not isRepetition(thisGenStr)):
-        if (self.gens<100 and not isRepetition(thisGenStr)):
-            processNextGen(COLS, ROWS, self.thisGen, self.nextGen)
-            time.sleep(DELAY)
-            self.thisGen, self.nextGen = self.nextGen, self.thisGen
-
-            self.image1 = ImageTk.PhotoImage(Image.open('gen.png'))
-            self.panel1.configure(image=self.image1)
-            self.display = self.image1
-            # self.root.after(3000, self.nextGen)
-        # else:
-            # imageio.mimsave('./GOF.gif', imagesGen)
-            # input("Finished. Press <return> to quit.")
-            # sys.exit()
-
-        return
-
 
     def initGrid(self, cols, rows, array):
         for i in range(rows):
@@ -105,40 +81,21 @@ class GOFImage():
             array += [arrayRow]
 
     def printGen(self, cols, rows, array, genNo, imageGen):
-        os.system("clear")
-
-        # print("Game of Life -- Generation " + str(genNo + 1))
-        print(str(genNo))
-
         strArray = ""
+        im = Image.new('L', (cols, rows))
         for i in range(rows):
             for j in range(cols):
                 if array[i][j] == -1:
-                    # strArray += '#'
                     True
                 elif array[i][j] == 1:
                     strArray += '.'
+                    im.putpixel((j,i),1000)
                 else:
                     strArray += ' '
-            strArray += '\n'
-
-        im = Image.new('L', (cols, rows))
-        c = l = 0
-        for v in strArray:
-            if v == '.':
-                im.putpixel((c,l),1000)
-            elif v == ' ':
-                im.putpixel((c,l),0)
-            c += 1
-            if c == cols-1:
-                c=0
-                l+=1
+                    im.putpixel((j,i),0)
 
         im.save(IMAGE_PATH)
-        for _ in range(5):
-            imageGen.append(imageio.imread(IMAGE_PATH))
 
-        # print(strArray)
         return strArray
 
     def processNextGen(self, cols, rows, cur, nxt):
@@ -172,36 +129,11 @@ class GOFImage():
             PASTGENS.append(hashStr)
             return False
 
-def main():
-    thisGen = []
-    nextGen = []
 
-    initGrid(COLS, ROWS, thisGen)
-    initGrid(COLS, ROWS, nextGen)
-
-    gens = 0
-    imagesGen = []
-
-    while True:
-        gens += 1
-        thisGenStr = printGen(COLS, ROWS, thisGen, gens, imagesGen)
-        # if (not isRepetition(thisGenStr)):
-        if (gens<100 and not isRepetition(thisGenStr)):
-            processNextGen(COLS, ROWS, thisGen, nextGen)
-            time.sleep(DELAY)
-            thisGen, nextGen = nextGen, thisGen
-        else:
-            imageio.mimsave('./GOF.gif', imagesGen)
-            input("Finished. Press <return> to quit.")
-            sys.exit()
-
-
-ROWS = 500
-COLS = 500
-GENERATIONS = 100
-# DELAY = 0.3
-DELAY = 0.0
+ROWS = 200
+COLS = 200
+DELAY = 1
 PASTGENS = []
 IMAGE_PATH='./gen.png'
-# main()
+
 test = GOFImage()
