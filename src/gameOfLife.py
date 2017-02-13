@@ -24,11 +24,17 @@ class GOFImage():
         self.root = tk.Tk()
         self.root.title('GEN')
 
-        # pick an image file you have .bmp  .jpg  .gif.  .png
-        # load the file and covert it to a Tkinter image object
-        self.image1 = ImageTk.PhotoImage(Image.open(IMAGE_PATH))
+        self.thisGen = []
+        self.nextGen = []
 
-        # get the image size
+        self.initGrid(COLS, ROWS, self.thisGen)
+        self.initGrid(COLS, ROWS, self.nextGen)
+
+        self.gens = 0
+        self.imagesGen = []
+
+        self.image1 = ImageTk.PhotoImage(Image.open('gen.png'))
+
         w = self.image1.width()*10
         h = self.image1.height()*10
 
@@ -43,91 +49,128 @@ class GOFImage():
         self.panel1 = tk.Label(self.root, image=self.image1)
         self.display = self.image1
         self.panel1.pack(side=tk.TOP, fill=tk.BOTH, expand=tk.YES)
-        print("Display image1")
-        # self.root.after(30000, self.update_image)
+
+        # self.root.after(3000, self.nextGen)
+        self.root.after(1, self.toto)
         self.root.mainloop()
 
-def initGrid(cols, rows, array):
-    for i in range(rows):
-        arrayRow = []
-        for j in range(cols):
-            if (i == 0 or j == 0 or (i == rows - 1) or (j == cols - 1)):
-                arrayRow += [-1]
-            else:
-                ran = random.randint(0,3)
-                if ran == 0:
-                    arrayRow += [1]
+    def toto(self):
+        self.gens += 1
+        self.thisGenStr = self.printGen(COLS, ROWS, self.thisGen, self.gens, self.imagesGen)
+
+        if (self.gens<100 and not self.isRepetition(self.thisGenStr)):
+            self.processNextGen(COLS, ROWS, self.thisGen, self.nextGen)
+            self.thisGen, self.nextGen = self.nextGen, self.thisGen
+
+            self.image1 = ImageTk.PhotoImage(Image.open('gen.png'))
+            self.panel1.configure(image=self.image1)
+            self.display = self.image1
+
+            self.root.after(1, self.toto)
+        return
+
+    def nextGen(self):
+        self.gens += 1
+        thisGenStr = self.printGen(COLS, ROWS, self.thisGen, self.gens, imagesGen)
+        # if (not isRepetition(thisGenStr)):
+        if (self.gens<100 and not isRepetition(thisGenStr)):
+            processNextGen(COLS, ROWS, self.thisGen, self.nextGen)
+            time.sleep(DELAY)
+            self.thisGen, self.nextGen = self.nextGen, self.thisGen
+
+            self.image1 = ImageTk.PhotoImage(Image.open('gen.png'))
+            self.panel1.configure(image=self.image1)
+            self.display = self.image1
+            # self.root.after(3000, self.nextGen)
+        # else:
+            # imageio.mimsave('./GOF.gif', imagesGen)
+            # input("Finished. Press <return> to quit.")
+            # sys.exit()
+
+        return
+
+
+    def initGrid(self, cols, rows, array):
+        for i in range(rows):
+            arrayRow = []
+            for j in range(cols):
+                if (i == 0 or j == 0 or (i == rows - 1) or (j == cols - 1)):
+                    arrayRow += [-1]
                 else:
-                    arrayRow += [0]
-        array += [arrayRow]
+                    ran = random.randint(0,3)
+                    if ran == 0:
+                        arrayRow += [1]
+                    else:
+                        arrayRow += [0]
+            array += [arrayRow]
 
-def printGen(cols, rows, array, genNo, imageGen):
-    os.system("clear")
+    def printGen(self, cols, rows, array, genNo, imageGen):
+        os.system("clear")
 
-    # print("Game of Life -- Generation " + str(genNo + 1))
-    print(str(genNo))
+        # print("Game of Life -- Generation " + str(genNo + 1))
+        print(str(genNo))
 
-    strArray = ""
-    for i in range(rows):
-        for j in range(cols):
-            if array[i][j] == -1:
-                # strArray += '#'
-                True
-            elif array[i][j] == 1:
-                strArray += '.'
-            else:
-                strArray += ' '
-        strArray += '\n'
+        strArray = ""
+        for i in range(rows):
+            for j in range(cols):
+                if array[i][j] == -1:
+                    # strArray += '#'
+                    True
+                elif array[i][j] == 1:
+                    strArray += '.'
+                else:
+                    strArray += ' '
+            strArray += '\n'
 
-    im = Image.new('L', (cols, rows))
-    c = l = 0
-    for v in strArray:
-        if v == '.':
-            im.putpixel((c,l),1000)
-        elif v == ' ':
-            im.putpixel((c,l),0)
-        c += 1
-        if c == cols-1:
-            c=0
-            l+=1
+        im = Image.new('L', (cols, rows))
+        c = l = 0
+        for v in strArray:
+            if v == '.':
+                im.putpixel((c,l),1000)
+            elif v == ' ':
+                im.putpixel((c,l),0)
+            c += 1
+            if c == cols-1:
+                c=0
+                l+=1
 
-    im.save(IMAGE_PATH)
-    for _ in range(5):
-        imageGen.append(imageio.imread(IMAGE_PATH))
+        im.save(IMAGE_PATH)
+        for _ in range(5):
+            imageGen.append(imageio.imread(IMAGE_PATH))
 
-    # print(strArray)
-    return strArray
+        # print(strArray)
+        return strArray
 
-def processNextGen(cols, rows, cur, nxt):
-    for i in range(1,rows-1):
-        for j in range(1,cols-1):
-            nxt[i][j] = processNeighbours(i, j, cur)
+    def processNextGen(self, cols, rows, cur, nxt):
+        for i in range(1,rows-1):
+            for j in range(1,cols-1):
+                nxt[i][j] = self.processNeighbours(i, j, cur)
 
-def processNeighbours(x, y, array):
-    nCount = 0
-    for j in range(y-1,y+2):
-        for i in range(x-1,x+2):
-            if not(i == x and j == y):
-                if array[i][j] != -1:
-                    nCount += array[i][j]
-    if array[x][y] == 1 and nCount < 2:
-        return 0
-    if array[x][y] == 1 and nCount > 3:
-        return 0
-    if array[x][y] == 0 and nCount == 3:
-        return 1
-    else:
-        return array[x][y]
+    def processNeighbours(self, x, y, array):
+        nCount = 0
+        for j in range(y-1,y+2):
+            for i in range(x-1,x+2):
+                if not(i == x and j == y):
+                    if array[i][j] != -1:
+                        nCount += array[i][j]
+        if array[x][y] == 1 and nCount < 2:
+            return 0
+        if array[x][y] == 1 and nCount > 3:
+            return 0
+        if array[x][y] == 0 and nCount == 3:
+            return 1
+        else:
+            return array[x][y]
 
-def isRepetition(thisGenStr):
-    global PASTGENS
-    hashStr = hashlib.md5(thisGenStr.encode('utf-8')).hexdigest()
+    def isRepetition(self, thisGenStr):
+        global PASTGENS
+        hashStr = hashlib.md5(thisGenStr.encode('utf-8')).hexdigest()
 
-    if hashStr in PASTGENS :
-        return True
-    else:
-        PASTGENS.append(hashStr)
-        return False
+        if hashStr in PASTGENS :
+            return True
+        else:
+            PASTGENS.append(hashStr)
+            return False
 
 def main():
     thisGen = []
@@ -153,12 +196,12 @@ def main():
             sys.exit()
 
 
-ROWS = 100
-COLS = 200
+ROWS = 500
+COLS = 500
 GENERATIONS = 100
 # DELAY = 0.3
 DELAY = 0.0
 PASTGENS = []
 IMAGE_PATH='./gen.png'
-main()
-# test= GOFImage()
+# main()
+test = GOFImage()
