@@ -10,9 +10,9 @@
 import sys
 import os
 sys.path.insert(0, os.path.abspath('./'))
-from GOFImage import *
+from GOLImage import *
 
 def main():
-    test = GOFImage()
+    test = GOLImage()
 
 main()
